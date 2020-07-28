@@ -1,17 +1,26 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.FXGLMenu;
+import com.almasb.fxgl.app.scene.MenuType;
+import com.almasb.fxgl.app.scene.SceneFactory;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.input.UserAction;
+
+import javafx.scene.control.Button;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.Map;
-import java.util.Spliterator;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -24,19 +33,23 @@ public class PongGame extends GameApplication{
     private static final int PADDLE_SPEED = 5;
     private static final int BALL_SPEED = 5;
 
+    //  Difficulty speeds for AI paddle
+    private static final double EASY_SPEED = 2.5;
+
+    //private static final double MEDIUM_SPEED = 3.5;
+
+
     //  Game objects (FXGL object is called entity)
     private Entity paddle1;
     private Entity paddle2;
     private Entity ball;
 
-
     //  Game settings
     @Override
     protected void initSettings(GameSettings gameSettings) {
-
-        //  Set the title of the application
-        gameSettings.setTitle("Pong Game");
+        gameSettings.setTitle("Pong");
     }
+
 
 
     //  Initialize game input
@@ -51,7 +64,7 @@ public class PongGame extends GameApplication{
         getInput().addAction(new UserAction("Up 1") {
             @Override
             protected void onAction() {
-                paddle1.translateY(-PADDLE_SPEED);
+                    paddle1.translateY(-PADDLE_SPEED);
             }
         }, KeyCode.W);
 
@@ -59,7 +72,8 @@ public class PongGame extends GameApplication{
         getInput().addAction(new UserAction("Down 1") {
             @Override
             protected void onAction() {
-                paddle1.translateY(PADDLE_SPEED);
+                    paddle1.translateY(PADDLE_SPEED);
+
             }
         }, KeyCode.S);
 
@@ -69,21 +83,22 @@ public class PongGame extends GameApplication{
          *   Player 2 Movements
          */
         //  Move paddle up for player 2 using the key UP directional key
-        getInput().addAction(new UserAction("Up 2") {
-            @Override
-            protected void onAction() {
-                paddle2.translateY(-PADDLE_SPEED);
-            }
-        }, KeyCode.UP);
-
-        //  Move paddle up for player 2 using the key DOWN directional key
-        getInput().addAction(new UserAction("Down 2") {
-            @Override
-            protected void onAction() {
-                paddle2.translateY(PADDLE_SPEED);
-            }
-        }, KeyCode.DOWN);
+//        getInput().addAction(new UserAction("Up 2") {
+//            @Override
+//            protected void onAction() {
+//                paddle2.translateY(-PADDLE_SPEED);
+//            }
+//        }, KeyCode.UP);
+//
+//        //  Move paddle up for player 2 using the key DOWN directional key
+//        getInput().addAction(new UserAction("Down 2") {
+//            @Override
+//            protected void onAction() {
+//                paddle2.translateY(PADDLE_SPEED);
+//            }
+//        }, KeyCode.DOWN);
     }
+
 
 
     //  Initialize score for game
@@ -180,16 +195,23 @@ public class PongGame extends GameApplication{
             resetBall();
         }
 
-        //  if the ball hits the bottom of the screen, reverse y direction
+        //  if the ball hits the top of the screen, reverse y direction
         if (ball.getY() <= 0){
             ball.setY(0);
             ball.setProperty("velocity", new Point2D(velocity.getX(), -velocity.getY()));
         }
 
-        //  if the ball hits the top of the screen, reverse y direction
+        //  if the ball hits the bottom of the screen, reverse y direction
         if (ball.getBottomY() >= getAppHeight()){
             ball.setY(getAppHeight() - BALL_SIZE);
             ball.setProperty("velocity", new Point2D(velocity.getX(), -velocity.getY()));
+        }
+
+        //  have the enemy track the ball, either above or below the paddle and move in that direction with a maximum speed
+        if (ball.getY() <= paddle2.getY()){
+            paddle2.translateY(-EASY_SPEED);
+        } else {
+            paddle2.translateY(EASY_SPEED);
         }
 
 
